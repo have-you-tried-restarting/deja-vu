@@ -83,6 +83,8 @@ func runInstall(dir string, args []string, uninstall bool) error {
 	for _, arg := range args {
 		if arg == "--no-guidance" {
 			guidance = false
+			skippingGuidance = true
+			defer func() { skippingGuidance = false }()
 			continue
 		}
 		// For scripted installs that do not want to spend the build here.
@@ -1604,6 +1606,11 @@ var removingTargets map[string]bool
 // forceGuidance is set by `deja install --force`: replace a skill deja can see
 // has been edited since it wrote it.
 var forceGuidance bool
+
+// skippingGuidance is set by `deja install --no-guidance` for the length of the
+// run. The /deja command file is written after the target, so a target that
+// names it in its own report has to know it will not be written (#5589).
+var skippingGuidance bool
 
 // configParseError names the file a parse refusal is about. The refusal is what
 // a reader is sent to act on — doctor points at `deja install <targets>` when a
